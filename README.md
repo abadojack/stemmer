@@ -24,6 +24,3 @@ fmt.Println(s)  //ludi
 s := stemmer.StemAggressive("ludas")
 fmt.Println(s)  //lud
 ```
-
-
-#NOTE: As of Tue Jan 10 04:34:15 IST 2017, not all test cases pass.

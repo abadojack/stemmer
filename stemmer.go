@@ -1,6 +1,9 @@
 package stemmer
 
-import "strings"
+import (
+	"regexp"
+	"strings"
+)
 
 //roots represents standalone root words
 var roots = []string{"ĉar", "ĉi", "ĉu", "kaj", "ke", "la", "minus", "plus",
@@ -9,6 +12,7 @@ var roots = []string{"ĉar", "ĉi", "ĉu", "kaj", "ke", "la", "minus", "plus",
 	"pli", "tamen", "tre", "tro", "ci", "ĝi", "ili", "li", "mi", "ni", "oni",
 	"ri", "si", "ŝi", "ŝli", "vi", "unu", "du", "tri", "kvin", "ĵus", "nun", "plu",
 	"tuj", "amen", "bis", "boj", "fi", "ha", "he", "ho", "hu", "hura", "nu", "ve",
+	"esperanto",
 }
 
 //correlative roots
@@ -22,6 +26,7 @@ var correlatives = []string{
 
 //Stem returns the word's base form.
 func Stem(word string) string {
+	word = strings.TrimSpace(strings.ToLower(word))
 	//standalone roots
 	for _, root := range roots {
 		if word == root {
@@ -185,16 +190,21 @@ func StemAggressive(word string) string {
 		strings.HasSuffix(word, "o") || strings.HasSuffix(word, "u") {
 		word = word[:len(word)-1]
 	}
-	/*
-		//remove suffix for participle nouns:
-		//-int- -ant- -ont- -it- -at- -ot-
-		word = strings.TrimSuffix(word, "int")
-		word = strings.TrimSuffix(word, "ant")
-		word = strings.TrimSuffix(word, "ont")
-		word = strings.TrimSuffix(word, "it")
-		word = strings.TrimSuffix(word, "at")
-		word = strings.TrimSuffix(word, "ot")
-	*/
+
+	//remove suffix for participle nouns:
+	//-int- -ant- -ont- -it- -at- -ot-
+	matched, err := regexp.MatchString("[aeiou].*(int|ant|ont|it|at|ot)$", word)
+	if err == nil && matched {
+
+		switch {
+		case strings.HasSuffix(word, "int") || strings.HasSuffix(word, "ant") || strings.HasSuffix(word, "ont"):
+			word = word[:len(word)-3] // I chose not to use strings.TrimSuffix because because it calls strings.HasSuffix again.
+		case strings.HasSuffix(word, "it") || strings.HasSuffix(word, "at") || strings.HasSuffix(word, "ot"):
+			word = word[:len(word)-2]
+		}
+
+	}
+
 	return word
 }
 
